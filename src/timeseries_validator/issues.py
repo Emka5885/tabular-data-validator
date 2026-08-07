@@ -2,6 +2,7 @@ from enum import Enum
 
 class ValidationCode(Enum):
     EMPTY_DATASET = "empty_dataset"
+    MISSING_REQUIRED_COLUMNS = "missing_required_columns"
 
 class Severity(Enum):
     ERROR = "error"
