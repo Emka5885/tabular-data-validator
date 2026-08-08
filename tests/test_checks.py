@@ -1,6 +1,6 @@
 import pandas as pd
 from timeseries_validator.issues import ValidationCode, Severity
-from timeseries_validator.checks import validate_empty_dataset, validate_required_columns
+from timeseries_validator.checks import validate_empty_dataset, validate_required_columns, validate_missing_values
 
 # ------------------------------
 # Empty dataset
@@ -46,6 +46,47 @@ def test_required_columns_exist():
 
     # Validate the DataFrame with required columns
     issues = validate_required_columns(test_df, ["test2", "test3"])
+
+    # Check that the emtpy list is returned
+    assert issues == []
+
+
+# ------------------------------
+# Missing values
+# ------------------------------
+def test_missing_values_in_specific_columns():
+    test_df = pd.DataFrame({"test": [0,2,3,None], "test2": [None,1,2,3]})
+
+    # Validate selected columns
+    issues = validate_missing_values(test_df, ["test", "test2"])
+
+    # Check that the correct issues are returned
+    assert len(issues) == 2
+
+    assert issues[1].code == ValidationCode.MISSING_VALUES
+    assert issues[1].severity == Severity.ERROR
+    assert "test2" in issues[1].message
+    assert "0" in issues[1].message
+
+    assert issues[0].code == ValidationCode.MISSING_VALUES
+    assert issues[0].severity == Severity.ERROR
+    assert "test" in issues[0].message
+    assert "3" in issues[0].message
+
+def test_specific_column_has_all_values():
+    test_df = pd.DataFrame({"test": [0,1,2,3]})
+
+    # Validate selected columns
+    issues = validate_missing_values(test_df, ["test"])
+
+    # Check that the emtpy list is returned
+    assert issues == []
+
+def test_specific_column_has_all_values_but_the_other_column_has_missing_values():
+    test_df = pd.DataFrame({"test": [0, 2, 3, 4], "test2": [None, 1, 2, 3]})
+
+    # Validate selected columns
+    issues = validate_missing_values(test_df, ["test"])
 
     # Check that the emtpy list is returned
     assert issues == []
