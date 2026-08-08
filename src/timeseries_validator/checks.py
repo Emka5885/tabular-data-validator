@@ -17,3 +17,17 @@ def validate_required_columns(data: pd.DataFrame, required_columns: list[str]) -
 
     message = "Missing required columns: " + ", ".join(missing_columns)
     return [ValidationIssue(ValidationCode.MISSING_REQUIRED_COLUMNS, Severity.ERROR, message)]
+
+def validate_missing_values(data: pd.DataFrame, columns: list[str]) -> list[ValidationIssue]:
+    missing = {}
+    for column in columns:
+        missing_values = data[column].isna()
+        if missing_values.any():
+            missing.update({column: data[missing_values].index.tolist()})
+
+    errors = []
+    for m in missing:
+        message = f"Column '{m}' has missing values in rows: {missing[m]}"
+        errors.append(ValidationIssue(ValidationCode.MISSING_VALUES, Severity.ERROR, message))
+
+    return errors
