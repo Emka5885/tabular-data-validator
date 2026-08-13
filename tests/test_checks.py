@@ -1,6 +1,6 @@
 import pandas as pd
 from timeseries_validator.issues import ValidationCode, Severity
-from timeseries_validator.checks import validate_empty_dataset, validate_required_columns, validate_missing_values
+from timeseries_validator.checks import validate_empty_dataset, validate_required_columns, validate_missing_values, validate_data_type
 
 # ------------------------------
 # Empty dataset
@@ -87,6 +87,79 @@ def test_specific_column_has_all_values_but_the_other_column_has_missing_values(
 
     # Validate selected columns
     issues = validate_missing_values(test_df, ["test"])
+
+    # Check that the emtpy list is returned
+    assert issues == []
+
+
+# ------------------------------
+# Data types
+# ------------------------------
+def test_all_values_have_expected_data_type():
+    test_df = pd.DataFrame({"test": [6,7,2,3]})
+
+    # Validate data types
+    issues = validate_data_type(test_df, "test", int)
+
+    # Check that the emtpy list is returned
+    assert issues == []
+
+def test_wrong_data_types_can_be_converted_to_expected_data_type():
+    test_df = pd.DataFrame({"test1": [0,"1",2,'3']})
+
+    # Validate data types
+    issues = validate_data_type(test_df, "test1", int)
+
+    # Check that the correct issues are returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.WRONG_DATA_TYPE
+    assert issues[0].severity == Severity.WARNING
+    assert "test1" in issues[0].message
+    assert "1" in issues[0].message
+    assert "3" in issues[0].message
+    assert "str" in issues[0].message
+
+def test_some_values_cannot_be_converted_to_expected_data_type():
+    test_df = pd.DataFrame({"test2": [0,1,"abc",3]})
+
+    # Validate data types
+    issues = validate_data_type(test_df, "test2", int)
+
+    # Check that the correct issues are returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.WRONG_DATA_TYPE
+    assert issues[0].severity == Severity.ERROR
+    assert "test2" in issues[0].message
+    assert "2" in issues[0].message
+    assert "str" in issues[0].message
+
+def test_some_values_can_be_converted_and_some_cannot():
+    test_df = pd.DataFrame({"test3": [0,"1","abc",'3']})
+
+    # Validate data types
+    issues = validate_data_type(test_df, "test3", int)
+
+    # Check that the correct issues are returned
+    assert len(issues) == 2
+
+    assert issues[0].code == ValidationCode.WRONG_DATA_TYPE
+    assert issues[0].severity == Severity.WARNING
+    assert "test3" in issues[0].message
+    assert "1" in issues[0].message
+    assert "3" in issues[0].message
+    assert "str" in issues[0].message
+
+    assert issues[1].code == ValidationCode.WRONG_DATA_TYPE
+    assert issues[1].severity == Severity.ERROR
+    assert "test3" in issues[1].message
+    assert "2" in issues[1].message
+    assert "str" in issues[1].message
+
+def test_none_values_do_not_return_issues_during_data_type_validation():
+    test_df = pd.DataFrame({"test4": pd.Series([6,None,2, 3], dtype=object)})
+
+    # Validate data types
+    issues = validate_data_type(test_df, "test4", int)
 
     # Check that the emtpy list is returned
     assert issues == []

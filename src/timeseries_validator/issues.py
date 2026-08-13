@@ -4,6 +4,7 @@ class ValidationCode(Enum):
     EMPTY_DATASET = "empty_dataset"
     MISSING_REQUIRED_COLUMNS = "missing_required_columns"
     MISSING_VALUES = "missing_values"
+    WRONG_DATA_TYPE = "wrong_data_type"
 
 class Severity(Enum):
     ERROR = "error"
