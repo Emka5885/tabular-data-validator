@@ -33,16 +33,24 @@ def validate_missing_values(data: pd.DataFrame, columns: list[str]) -> list[Vali
 
     return errors
 
+# Missing values can cause pandas to change the type of other values in a column.
+# For example, integer values may be converted to floats when the column contains None.
+# This function validates the types after pandas has created the DataFrame.
 def validate_data_type(data: pd.DataFrame, column: str, data_type: type) -> list[ValidationIssue]:
     issues = []
 
     # Skip missing values - they are validated in 'validate_missing_values'
     missing = data[column].isna()
+
     # Check if value has the correct type
     correct_type = data[column].apply(
         lambda value: isinstance(value, data_type)
     )
+
     to_check = ~missing & ~correct_type
+    if not to_check.any():
+        return issues
+
     # Check if the value can be converted to the expected type
     convertible = pd.Series(False, index=data.index)
     convertible.loc[to_check] = data.loc[to_check, column].apply(
