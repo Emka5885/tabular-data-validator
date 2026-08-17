@@ -1,6 +1,7 @@
 import pandas as pd
 from timeseries_validator.issues import ValidationCode, Severity
-from timeseries_validator.checks import validate_empty_dataset, validate_required_columns, validate_missing_values, validate_data_type
+from timeseries_validator.checks import (validate_empty_dataset, validate_required_columns, validate_missing_values,
+                                         validate_data_type, validate_unique_values)
 
 # ------------------------------
 # Empty dataset
@@ -22,7 +23,7 @@ def test_nonempty_dataset():
     # Validate the nonempty DataFrame
     issues = validate_empty_dataset(nonempty_df)
 
-    # Check that the emtpy list is returned
+    # Check that the empty list is returned
     assert issues == []
 
 # ------------------------------
@@ -47,7 +48,7 @@ def test_required_columns_exist():
     # Validate the DataFrame with required columns
     issues = validate_required_columns(test_df, ["test2", "test3"])
 
-    # Check that the emtpy list is returned
+    # Check that the empty list is returned
     assert issues == []
 
 
@@ -79,7 +80,7 @@ def test_specific_column_has_all_values():
     # Validate selected columns
     issues = validate_missing_values(test_df, ["test"])
 
-    # Check that the emtpy list is returned
+    # Check that the empty list is returned
     assert issues == []
 
 def test_specific_column_has_all_values_but_the_other_column_has_missing_values():
@@ -88,7 +89,7 @@ def test_specific_column_has_all_values_but_the_other_column_has_missing_values(
     # Validate selected columns
     issues = validate_missing_values(test_df, ["test"])
 
-    # Check that the emtpy list is returned
+    # Check that the empty list is returned
     assert issues == []
 
 
@@ -161,5 +162,34 @@ def test_none_values_do_not_return_issues_during_data_type_validation():
     # Validate data types
     issues = validate_data_type(test_df, "test4", int)
 
-    # Check that the emtpy list is returned
+    # Check that the empty list is returned
+    assert issues == []
+
+
+# ------------------------------
+# Unique values
+# ------------------------------
+def test_duplicated_values():
+    test_df = pd.DataFrame({"test": [0,0,1,2,2]})
+
+    # Validate the DataFrame with duplicated values
+    issues = validate_unique_values(test_df, "test")
+
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.DUPLICATE_VALUES
+    assert issues[0].severity == Severity.ERROR
+    assert "test" in issues[0].message
+    assert "value 0" in issues[0].message
+    assert "[0, 1]" in issues[0].message
+    assert "value 2" in issues[0].message
+    assert "[3, 4]" in issues[0].message
+
+def test_only_unique_values():
+    test_df = pd.DataFrame({"test": [0, 1, None, None]})
+
+    # Validate the DataFrame with unique values
+    issues = validate_unique_values(test_df, "test")
+
+    # Check that the empty list is returned
     assert issues == []
