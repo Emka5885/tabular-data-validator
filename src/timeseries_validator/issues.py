@@ -5,6 +5,7 @@ class ValidationCode(Enum):
     MISSING_REQUIRED_COLUMNS = "missing_required_columns"
     MISSING_VALUES = "missing_values"
     WRONG_DATA_TYPE = "wrong_data_type"
+    DUPLICATE_VALUES = "duplicate_values"
 
 class Severity(Enum):
     ERROR = "error"

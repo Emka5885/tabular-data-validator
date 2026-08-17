@@ -78,3 +78,19 @@ def validate_data_type(data: pd.DataFrame, column: str, data_type: type) -> list
     issues.append(ValidationIssue(ValidationCode.WRONG_DATA_TYPE, Severity.ERROR, message))
 
     return issues
+
+def validate_unique_values(data: pd.DataFrame, column: str) -> list[ValidationIssue]:
+    # Skip missing values - they are validated in 'validate_missing_values'
+    values = data[column].dropna()
+
+    duplicated = values[values.duplicated(keep=False)]
+    duplicated_values = duplicated.unique()
+
+    if duplicated.empty:
+        return []
+
+    message = f"Duplicated values in column '{column}':\n"
+    for value in duplicated_values:
+        indexes = data.index[data[column] == value].tolist()
+        message += f"Duplicated value {value} found at indices: {indexes}\n"
+    return [ValidationIssue(ValidationCode.DUPLICATE_VALUES, Severity.ERROR, message)]
