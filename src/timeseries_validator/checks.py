@@ -94,3 +94,22 @@ def validate_unique_values(data: pd.DataFrame, column: str) -> list[ValidationIs
         indexes = data.index[data[column] == value].tolist()
         message += f"Duplicated value {value} found at indices: {indexes}\n"
     return [ValidationIssue(ValidationCode.DUPLICATE_VALUES, Severity.ERROR, message)]
+
+def validate_allowed_values(data: pd.DataFrame, column: str, allowed_values: list) -> list[ValidationIssue]:
+    # Skip missing values - they are validated in 'validate_missing_values'
+    values = data[column].dropna()
+
+    # Keep only values that are not in the allowed values list
+    incorrect_values = values[~values.isin(allowed_values)]
+
+    message = f"Values not allowed in column '{column}':\n"
+
+    for value in incorrect_values.unique():
+        message += f"found {value} at indices: {incorrect_values.index[incorrect_values == value].tolist()}\n"
+
+    issues = []
+    if not incorrect_values.empty:
+        message += f"Allowed values: {allowed_values}"
+        issues = [ValidationIssue(ValidationCode.NOT_ALLOWED_VALUES, Severity.ERROR, message)]
+
+    return issues

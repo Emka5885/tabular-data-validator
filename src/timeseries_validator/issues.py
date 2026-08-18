@@ -6,6 +6,7 @@ class ValidationCode(Enum):
     MISSING_VALUES = "missing_values"
     WRONG_DATA_TYPE = "wrong_data_type"
     DUPLICATE_VALUES = "duplicate_values"
+    NOT_ALLOWED_VALUES = "not_allowed_values"
 
 class Severity(Enum):
     ERROR = "error"

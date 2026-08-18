@@ -1,7 +1,7 @@
 import pandas as pd
 from timeseries_validator.issues import ValidationCode, Severity
 from timeseries_validator.checks import (validate_empty_dataset, validate_required_columns, validate_missing_values,
-                                         validate_data_type, validate_unique_values)
+                                         validate_data_type, validate_unique_values, validate_allowed_values)
 
 # ------------------------------
 # Empty dataset
@@ -193,3 +193,35 @@ def test_only_unique_values():
 
     # Check that the empty list is returned
     assert issues == []
+
+
+# ------------------------------
+# Allowed values
+# ------------------------------
+def test_only_allowed_values():
+    test_df = pd.DataFrame({"test": [0, 1, None, None, 1]})
+
+    # Validate the DataFrame with allowed values
+    issues = validate_allowed_values(test_df, "test", [0,1])
+
+    # Check that the empty list is returned
+    assert issues == []
+
+def test_not_allowed_values():
+    test_df = pd.DataFrame({"test": [0, 8, 0, 1, 9, 9]})
+
+    # Validate the DataFrame with not allowed values
+    issues = validate_allowed_values(test_df, "test", [0,1])
+
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.NOT_ALLOWED_VALUES
+    assert issues[0].severity == Severity.ERROR
+    assert "test" in issues[0].message
+    assert "Allowed values: [0, 1]" in issues[0].message
+
+    assert "found 8" in issues[0].message
+    assert "[1]" in issues[0].message
+
+    assert "found 9" in issues[0].message
+    assert "[4, 5]" in issues[0].message
