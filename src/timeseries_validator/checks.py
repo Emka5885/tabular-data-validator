@@ -99,17 +99,16 @@ def validate_allowed_values(data: pd.DataFrame, column: str, allowed_values: lis
     # Skip missing values - they are validated in 'validate_missing_values'
     values = data[column].dropna()
 
-    incorrect_values = []
+    # Keep only values that are not in the allowed values list
+    incorrect_values = values[~values.isin(allowed_values)]
+
     message = f"Values not allowed in column '{column}':\n"
 
-    for value in values:
-        if value not in allowed_values:
-            if value not in incorrect_values:
-                message += f"found {value} at indices: {data.index[data[column] == value].tolist()}\n"
-                incorrect_values.append(value)
+    for value in incorrect_values.unique():
+        message += f"found {value} at indices: {incorrect_values.index[incorrect_values == value].tolist()}\n"
 
     issues = []
-    if incorrect_values:
+    if not incorrect_values.empty:
         message += f"Allowed values: {allowed_values}"
         issues = [ValidationIssue(ValidationCode.NOT_ALLOWED_VALUES, Severity.ERROR, message)]
 
