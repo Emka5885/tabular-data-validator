@@ -1,7 +1,10 @@
 import pandas as pd
+import pytest
+
+from datetime import datetime
 from timeseries_validator.issues import ValidationCode, Severity
 from timeseries_validator.checks import (validate_empty_dataset, validate_required_columns, validate_missing_values,
-                                         validate_data_type, validate_unique_values, validate_allowed_values)
+                                         validate_data_type, validate_unique_values, validate_allowed_values, validate_value_range)
 
 # ------------------------------
 # Empty dataset
@@ -225,3 +228,69 @@ def test_not_allowed_values():
 
     assert "found 9" in issues[0].message
     assert "[4, 5]" in issues[0].message
+
+
+# ------------------------------
+# Value range
+# ------------------------------
+def test_values_in_range():
+    test_df = pd.DataFrame({"test": [0, 1, None, None, 1]})
+
+    # Validate the DataFrame within a specific range
+    issues = validate_value_range(test_df, "test", 0, 1)
+
+    # Check that the empty list is returned
+    assert issues == []
+
+def test_values_below_minimum():
+    test_df = pd.DataFrame({"test1": [0, 8, 0, 1, 9, 9]})
+
+    # Validate the DataFrame with values below minimum
+    issues = validate_value_range(test_df, "test1", 1, 9)
+
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.BELOW_MINIMUM
+    assert issues[0].severity == Severity.ERROR
+    assert "test1" in issues[0].message
+    assert "minimum '1'" in issues[0].message
+    assert "found 0" in issues[0].message
+    assert "[0, 2]" in issues[0].message
+
+def test_values_above_maximum():
+    test_df = pd.DataFrame({"test2": [0, 8, 0, 1, 9, 9]})
+
+    # Validate the DataFrame with values above maximum
+    issues = validate_value_range(test_df, "test2", 0, 8)
+
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.ABOVE_MAXIMUM
+    assert issues[0].severity == Severity.ERROR
+    assert "test2" in issues[0].message
+    assert "maximum '8'" in issues[0].message
+    assert "found 9" in issues[0].message
+    assert "[4, 5]" in issues[0].message
+
+def test_values_outside_range():
+    test_df = pd.DataFrame({"test3": [datetime(2023, 5, 1), datetime(2023, 1, 1), datetime(2023, 10, 1)]})
+
+    # Validate the DataFrame within a specific range
+    issues = validate_value_range(test_df, "test3", datetime(2023, 3, 1), datetime(2023, 7, 1))
+
+    # Check that the correct issues are returned
+    assert len(issues) == 2
+
+    assert issues[0].code == ValidationCode.BELOW_MINIMUM
+    assert issues[0].severity == Severity.ERROR
+    assert "[1]" in issues[0].message
+
+    assert issues[1].code == ValidationCode.ABOVE_MAXIMUM
+    assert issues[1].severity == Severity.ERROR
+    assert "[2]" in issues[1].message
+
+def test_minimum_greater_than_maximum_raises_error():
+    test_df = pd.DataFrame({"test4": [0, 8, 0, 1, 9, 9]})
+
+    with pytest.raises(ValueError):
+        validate_value_range(test_df, "test4", 8, 1)
