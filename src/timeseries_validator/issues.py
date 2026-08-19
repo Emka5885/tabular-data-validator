@@ -7,6 +7,8 @@ class ValidationCode(Enum):
     WRONG_DATA_TYPE = "wrong_data_type"
     DUPLICATE_VALUES = "duplicate_values"
     NOT_ALLOWED_VALUES = "not_allowed_values"
+    BELOW_MINIMUM = "below_minimum"
+    ABOVE_MAXIMUM = "above_maximum"
 
 class Severity(Enum):
     ERROR = "error"
