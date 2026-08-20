@@ -1,10 +1,10 @@
 import pandas as pd
 import pytest
-
 from datetime import datetime
 from timeseries_validator.issues import ValidationCode, Severity
 from timeseries_validator.checks import (validate_empty_dataset, validate_required_columns, validate_missing_values,
-                                         validate_data_type, validate_unique_values, validate_allowed_values, validate_value_range)
+                                         validate_data_type, validate_unique_values, validate_allowed_values, validate_value_range,
+                                         SortOrder, validate_sort_order)
 
 # ------------------------------
 # Empty dataset
@@ -228,6 +228,85 @@ def test_not_allowed_values():
 
     assert "found 9" in issues[0].message
     assert "[4, 5]" in issues[0].message
+
+
+# ------------------------------
+# Sort order
+# ------------------------------
+@pytest.mark.parametrize(
+    "values, sort_order",
+    [
+        ([1, 2, 3], SortOrder.INCREASING),
+        ([3, 2, 1], SortOrder.DECREASING),
+        ([1, 2, 2, 3], SortOrder.NON_DECREASING),
+        ([3, 2, 2, 1], SortOrder.NON_INCREASING),
+        ([2, 2, 2, 2], SortOrder.CONSTANT),
+    ],
+)
+def test_correct_sort_order(values, sort_order):
+    test_df = pd.DataFrame({"test": values})
+
+    # Validate the DataFrame with correct sort order
+    issues = validate_sort_order(test_df, "test", sort_order)
+
+    # Check that the empty list is returned
+    assert issues == []
+
+@pytest.mark.parametrize(
+    "values, sort_order",
+    [
+        ([3, 2, 1], SortOrder.INCREASING),
+        ([1, 2, 3], SortOrder.DECREASING),
+        ([1, 3, 2], SortOrder.NON_DECREASING),
+        ([2, 3, 1], SortOrder.NON_INCREASING),
+        ([1, 2, 2], SortOrder.CONSTANT),
+    ],
+)
+def test_wrong_sort_order(values, sort_order):
+    test_df = pd.DataFrame({"test1": values})
+
+    # Validate the DataFrame with wrong sort order
+    issues = validate_sort_order(test_df, "test1", sort_order)
+
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.SORT_ORDER
+    assert issues[0].severity == Severity.ERROR
+    assert "test1" in issues[0].message
+    assert sort_order.value in issues[0].message
+
+def test_increasing_order_rejects_duplicate_values():
+    test_df = pd.DataFrame({"test2": [1, 2, 2, 3]})
+
+    # Validate the DataFrame with wrong sort order
+    issues = validate_sort_order(test_df, "test2", SortOrder.INCREASING)
+
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.SORT_ORDER
+    assert issues[0].severity == Severity.ERROR
+    assert "test2" in issues[0].message
+    assert SortOrder.INCREASING.value in issues[0].message
+
+def test_decreasing_order_rejects_duplicate_values():
+    test_df = pd.DataFrame({"test3": [3, 2, 2, 1]})
+
+    # Validate the DataFrame with wrong sort order
+    issues = validate_sort_order(test_df, "test3", SortOrder.DECREASING)
+
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert issues[0].code == ValidationCode.SORT_ORDER
+    assert issues[0].severity == Severity.ERROR
+    assert "test3" in issues[0].message
+    assert SortOrder.DECREASING.value in issues[0].message
+
+def test_wrong_sort_order_argument():
+    test_df = pd.DataFrame({"test4": [1, 2, 3]})
+
+    # Check that the error is raised
+    with pytest.raises(ValueError):
+        validate_sort_order(test_df, "test4", "abc")
 
 
 # ------------------------------
