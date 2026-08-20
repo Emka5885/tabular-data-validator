@@ -8,6 +8,8 @@ class ValidationCode(Enum):
     DUPLICATE_VALUES = "duplicate_values"
     NOT_ALLOWED_VALUES = "not_allowed_values"
     SORT_ORDER = "sort_order"
+    BELOW_MINIMUM = "below_minimum"
+    ABOVE_MAXIMUM = "above_maximum"
 
 class Severity(Enum):
     ERROR = "error"

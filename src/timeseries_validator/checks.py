@@ -151,3 +151,29 @@ def validate_sort_order(data: pd.DataFrame, column: str, sort_order: SortOrder) 
         return [ValidationIssue(ValidationCode.SORT_ORDER, Severity.ERROR, message)]
 
     return issues
+
+def validate_value_range(data: pd.DataFrame, column: str, minimum, maximum) -> list[ValidationIssue]:
+    issues = []
+    # Skip missing values - they are validated in 'validate_missing_values'
+    values = data[column].dropna()
+
+    if minimum > maximum:
+        raise ValueError("Minimum value cannot be greater than maximum value.")
+
+    less_than_minimum = values[values < minimum]
+    if not less_than_minimum.empty:
+        message = f"Values below the minimum '{minimum}' in column '{column}':\n"
+        for value in less_than_minimum.unique():
+            indexes = less_than_minimum.index[less_than_minimum == value].tolist()
+            message += f"found {value} at indices: {indexes}\n"
+        issues.append(ValidationIssue(ValidationCode.BELOW_MINIMUM, Severity.ERROR, message))
+
+    greater_than_maximum = values[values > maximum]
+    if not greater_than_maximum.empty:
+        message = f"Values above the maximum '{maximum}' in column '{column}':\n"
+        for value in greater_than_maximum.unique():
+            indexes = greater_than_maximum.index[greater_than_maximum == value].tolist()
+            message += f"found {value} at indices: {indexes}\n"
+        issues.append(ValidationIssue(ValidationCode.ABOVE_MAXIMUM, Severity.ERROR, message))
+
+    return issues
