@@ -2,6 +2,15 @@ import pandas as pd
 from .issues import ValidationIssue, ValidationCode, Severity
 from timeseries_validator.conversion import can_convert
 
+from enum import Enum
+
+class SortOrder(Enum):
+    DECREASING = "decreasing"
+    INCREASING = "increasing"
+    NON_DECREASING = "non_decreasing"
+    NON_INCREASING = "non_increasing"
+    CONSTANT = "constant"
+
 def validate_empty_dataset(data: pd.DataFrame) -> list[ValidationIssue]:
     if data.empty:
         return [ValidationIssue(ValidationCode.EMPTY_DATASET, Severity.ERROR, "Dataset is empty")]
@@ -111,5 +120,34 @@ def validate_allowed_values(data: pd.DataFrame, column: str, allowed_values: lis
     if not incorrect_values.empty:
         message += f"Allowed values: {allowed_values}"
         issues = [ValidationIssue(ValidationCode.NOT_ALLOWED_VALUES, Severity.ERROR, message)]
+
+    return issues
+
+def validate_sort_order(data: pd.DataFrame, column: str, sort_order: SortOrder) -> list[ValidationIssue]:
+    issues = []
+    # Skip missing values - they are validated in 'validate_missing_values'
+    values = data[column].dropna()
+    if values.empty:
+        return issues
+
+    is_valid = True
+    match sort_order:
+        case SortOrder.DECREASING:
+            is_valid = values.is_monotonic_decreasing and values.is_unique
+        case SortOrder.INCREASING:
+            is_valid = values.is_monotonic_increasing and values.is_unique
+        case SortOrder.NON_DECREASING:
+            is_valid = values.is_monotonic_increasing
+        case SortOrder.NON_INCREASING:
+            is_valid = values.is_monotonic_decreasing
+        case SortOrder.CONSTANT:
+            if values.nunique() != 1:
+                is_valid = False
+        case _:
+            raise ValueError(f"Unsupported sort order: {sort_order}.")
+
+    if not is_valid:
+        message = f"Column '{column}' does not have {sort_order.value} sort order"
+        return [ValidationIssue(ValidationCode.SORT_ORDER, Severity.ERROR, message)]
 
     return issues

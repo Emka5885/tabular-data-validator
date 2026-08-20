@@ -7,6 +7,7 @@ class ValidationCode(Enum):
     WRONG_DATA_TYPE = "wrong_data_type"
     DUPLICATE_VALUES = "duplicate_values"
     NOT_ALLOWED_VALUES = "not_allowed_values"
+    SORT_ORDER = "sort_order"
 
 class Severity(Enum):
     ERROR = "error"
