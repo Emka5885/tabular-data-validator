@@ -2,14 +2,7 @@ import pandas as pd
 from .issues import ValidationIssue, ValidationCode, Severity
 from timeseries_validator.conversion import can_convert
 
-from enum import Enum
-
-class SortOrder(Enum):
-    DECREASING = "decreasing"
-    INCREASING = "increasing"
-    NON_DECREASING = "non_decreasing"
-    NON_INCREASING = "non_increasing"
-    CONSTANT = "constant"
+from .validation_options import SortOrder
 
 def validate_empty_dataset(data: pd.DataFrame) -> list[ValidationIssue]:
     if data.empty:
