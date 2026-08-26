@@ -30,4 +30,11 @@ def validate(dataset: pd.DataFrame, contract: ValidationContract) -> list[Valida
                       if rule.no_missing_values and column_name in dataset.columns]
     issues.extend(validate_missing_values(dataset, missing_values))
 
+    # Data types
+    data_types = {column_name : rule.data_type
+                      for column_name, rule in contract.columns.items()
+                      if rule.data_type is not None and column_name in dataset.columns}
+    for column_name, data_type in data_types.items():
+        issues.extend(validate_data_type(dataset, column_name, data_type))
+
     return issues
