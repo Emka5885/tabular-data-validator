@@ -3,7 +3,7 @@ import pandas as pd
 from .contract import ValidationContract
 from .issues import ValidationIssue
 from .checks import (validate_empty_dataset, validate_required_columns, validate_missing_values, validate_data_type,
-                     validate_unique_values)
+                     validate_unique_values, validate_allowed_values)
 
 def validate(dataset: pd.DataFrame, contract: ValidationContract) -> list[ValidationIssue]:
     """
@@ -44,5 +44,12 @@ def validate(dataset: pd.DataFrame, contract: ValidationContract) -> list[Valida
                       if rule.only_unique_values and column_name in dataset.columns]
     for column_name in unique_values:
         issues.extend(validate_unique_values(dataset, column_name))
+
+    # Allowed values
+    allowed_values = {column_name: rule.allowed_values
+                  for column_name, rule in contract.columns.items()
+                  if rule.allowed_values is not None and column_name in dataset.columns}
+    for column_name, allowed in allowed_values.items():
+        issues.extend(validate_allowed_values(dataset, column_name, allowed))
 
     return issues
