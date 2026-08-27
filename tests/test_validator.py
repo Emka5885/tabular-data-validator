@@ -110,4 +110,25 @@ def test_validate_unique_values():
         for issue in issues
     )
 
+def test_validate_allowed_values():
+    test_df = pd.DataFrame({"test1": [None, 1, 0], "test2": [2, 2, 3]})
+    validation_contract = ValidationContract(require_non_empty=False, columns={
+        "test1" : ColumnRules(allowed_values=[0,1]),
+        "test2": ColumnRules(allowed_values=[2])
+    })
+
+    # Validate the DataFrame
+    issues = validate(test_df, validation_contract)
+
+    # Should skip missing values
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert any(
+        issue.code == ValidationCode.NOT_ALLOWED_VALUES
+        and "test2" in issue.message
+        and "found 3" in issue.message
+        and "indices: [2]" in issue.message
+        for issue in issues
+    )
+
 
