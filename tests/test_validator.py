@@ -1,4 +1,6 @@
 import pandas as pd
+
+from timeseries_validator import issues
 from timeseries_validator.validator import validate
 from timeseries_validator.contract import ValidationContract, ColumnRules
 from timeseries_validator.issues import ValidationCode, Severity
@@ -83,6 +85,28 @@ def test_validate_data_types():
         and "test3" in issue.message
         and "for rows: [2]" in issue.message
         and issue.severity == Severity.ERROR
+        for issue in issues
+    )
+
+def test_validate_unique_values():
+    test_df = pd.DataFrame({"test1": [None, 1, None], "test2": [2, 2, 3], "test3": [2, 2, 3]})
+    validation_contract = ValidationContract(require_non_empty=True, columns={
+        "test1" : ColumnRules(only_unique_values=True),
+        "test2": ColumnRules(only_unique_values=True),
+        "test3": ColumnRules(only_unique_values=False)
+    })
+
+    # Validate the DataFrame
+    issues = validate(test_df, validation_contract)
+
+    # Should skip missing values
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert any(
+        issue.code == ValidationCode.DUPLICATE_VALUES
+        and "test2" in issue.message
+        and "value 2" in issue.message
+        and "indices: [0, 1]" in issue.message
         for issue in issues
     )
 
