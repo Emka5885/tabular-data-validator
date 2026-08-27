@@ -2,14 +2,7 @@ import pandas as pd
 from .issues import ValidationIssue, ValidationCode, Severity
 from timeseries_validator.conversion import can_convert
 
-from enum import Enum
-
-class SortOrder(Enum):
-    DECREASING = "decreasing"
-    INCREASING = "increasing"
-    NON_DECREASING = "non_decreasing"
-    NON_INCREASING = "non_increasing"
-    CONSTANT = "constant"
+from .validation_options import SortOrder
 
 def validate_empty_dataset(data: pd.DataFrame) -> list[ValidationIssue]:
     if data.empty:
@@ -157,8 +150,9 @@ def validate_value_range(data: pd.DataFrame, column: str, minimum, maximum) -> l
     # Skip missing values - they are validated in 'validate_missing_values'
     values = data[column].dropna()
 
-    if minimum > maximum:
-        raise ValueError("Minimum value cannot be greater than maximum value.")
+    if minimum is not None and maximum is not None:
+        if minimum > maximum:
+            raise ValueError("Minimum value cannot be greater than maximum value.")
 
     less_than_minimum = values[values < minimum]
     if not less_than_minimum.empty:

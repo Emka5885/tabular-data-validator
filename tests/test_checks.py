@@ -4,7 +4,8 @@ from datetime import datetime
 from timeseries_validator.issues import ValidationCode, Severity
 from timeseries_validator.checks import (validate_empty_dataset, validate_required_columns, validate_missing_values,
                                          validate_data_type, validate_unique_values, validate_allowed_values, validate_value_range,
-                                         SortOrder, validate_sort_order)
+                                         validate_sort_order)
+from timeseries_validator.validation_options import SortOrder
 
 # ------------------------------
 # Empty dataset
