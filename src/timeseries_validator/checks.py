@@ -150,8 +150,9 @@ def validate_value_range(data: pd.DataFrame, column: str, minimum, maximum) -> l
     # Skip missing values - they are validated in 'validate_missing_values'
     values = data[column].dropna()
 
-    if minimum > maximum:
-        raise ValueError("Minimum value cannot be greater than maximum value.")
+    if minimum is not None and maximum is not None:
+        if minimum > maximum:
+            raise ValueError("Minimum value cannot be greater than maximum value.")
 
     less_than_minimum = values[values < minimum]
     if not less_than_minimum.empty:
