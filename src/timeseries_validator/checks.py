@@ -91,10 +91,10 @@ def validate_unique_values(data: pd.DataFrame, column: str) -> list[ValidationIs
     if duplicated.empty:
         return []
 
-    message = f"[ERROR] Duplicated values in column '{column}':\n"
+    message = f"[ERROR] Duplicated values in column '{column}':"
     for value in duplicated_values:
         indexes = data.index[data[column] == value].tolist()
-        message += f"\t\t Duplicated value {value} found at indices: {indexes}\n"
+        message += f"\n\t\t Duplicated value {value} found at indices: {indexes}"
     return [ValidationIssue(ValidationCode.DUPLICATE_VALUES, Severity.ERROR, message)]
 
 def validate_allowed_values(data: pd.DataFrame, column: str, allowed_values: list) -> list[ValidationIssue]:
@@ -104,14 +104,14 @@ def validate_allowed_values(data: pd.DataFrame, column: str, allowed_values: lis
     # Keep only values that are not in the allowed values list
     incorrect_values = values[~values.isin(allowed_values)]
 
-    message = f"[ERROR] Values not allowed in column '{column}':\n"
+    message = f"[ERROR] Values not allowed in column '{column}':"
 
     for value in incorrect_values.unique():
-        message += f"\t\t found {value} at indices: {incorrect_values.index[incorrect_values == value].tolist()}\n"
+        message += f"\n\t\t found {value} at indices: {incorrect_values.index[incorrect_values == value].tolist()}"
 
     issues = []
     if not incorrect_values.empty:
-        message += f"\t\t Allowed values: {allowed_values}"
+        message += f"\n\t\t Allowed values: {allowed_values}"
         issues = [ValidationIssue(ValidationCode.NOT_ALLOWED_VALUES, Severity.ERROR, message)]
 
     return issues
@@ -156,18 +156,18 @@ def validate_value_range(data: pd.DataFrame, column: str, minimum, maximum) -> l
 
     less_than_minimum = values[values < minimum]
     if not less_than_minimum.empty:
-        message = f"[ERROR] Values below the minimum '{minimum}' in column '{column}':\n"
+        message = f"[ERROR] Values below the minimum '{minimum}' in column '{column}':"
         for value in less_than_minimum.unique():
             indexes = less_than_minimum.index[less_than_minimum == value].tolist()
-            message += f"\t\t found {value} at indices: {indexes}\n"
+            message += f"\n\t\t found {value} at indices: {indexes}\n"
         issues.append(ValidationIssue(ValidationCode.BELOW_MINIMUM, Severity.ERROR, message))
 
     greater_than_maximum = values[values > maximum]
     if not greater_than_maximum.empty:
-        message = f"[ERROR] Values above the maximum '{maximum}' in column '{column}':\n"
+        message = f"[ERROR] Values above the maximum '{maximum}' in column '{column}':"
         for value in greater_than_maximum.unique():
             indexes = greater_than_maximum.index[greater_than_maximum == value].tolist()
-            message += f"\t\t found {value} at indices: {indexes}\n"
+            message += f"\n\t\t found {value} at indices: {indexes}"
         issues.append(ValidationIssue(ValidationCode.ABOVE_MAXIMUM, Severity.ERROR, message))
 
     return issues
