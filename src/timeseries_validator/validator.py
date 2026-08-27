@@ -3,7 +3,7 @@ import pandas as pd
 from .contract import ValidationContract
 from .issues import ValidationIssue
 from .checks import (validate_empty_dataset, validate_required_columns, validate_missing_values, validate_data_type,
-                     validate_unique_values, validate_allowed_values)
+                     validate_unique_values, validate_allowed_values, validate_sort_order)
 
 def validate(dataset: pd.DataFrame, contract: ValidationContract) -> list[ValidationIssue]:
     """
@@ -51,5 +51,12 @@ def validate(dataset: pd.DataFrame, contract: ValidationContract) -> list[Valida
                   if rule.allowed_values is not None and column_name in dataset.columns}
     for column_name, allowed in allowed_values.items():
         issues.extend(validate_allowed_values(dataset, column_name, allowed))
+
+    # Sort order
+    sort_order = {column_name: rule.specific_sort_order
+                      for column_name, rule in contract.columns.items()
+                      if rule.specific_sort_order is not None and column_name in dataset.columns}
+    for column_name, order in sort_order.items():
+        issues.extend(validate_sort_order(dataset, column_name, order))
 
     return issues
