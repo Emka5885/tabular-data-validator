@@ -2,7 +2,8 @@ import pandas as pd
 
 from .contract import ValidationContract
 from .issues import ValidationIssue
-from .checks import validate_empty_dataset, validate_required_columns, validate_missing_values, validate_data_type
+from .checks import (validate_empty_dataset, validate_required_columns, validate_missing_values, validate_data_type,
+                     validate_unique_values)
 
 def validate(dataset: pd.DataFrame, contract: ValidationContract) -> list[ValidationIssue]:
     """
@@ -36,5 +37,12 @@ def validate(dataset: pd.DataFrame, contract: ValidationContract) -> list[Valida
                       if rule.data_type is not None and column_name in dataset.columns}
     for column_name, data_type in data_types.items():
         issues.extend(validate_data_type(dataset, column_name, data_type))
+
+    # Unique values
+    unique_values = [column_name
+                      for column_name, rule in contract.columns.items()
+                      if rule.only_unique_values and column_name in dataset.columns]
+    for column_name in unique_values:
+        issues.extend(validate_unique_values(dataset, column_name))
 
     return issues
