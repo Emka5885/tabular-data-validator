@@ -1,9 +1,9 @@
 import pandas as pd
 
-from timeseries_validator import issues
 from timeseries_validator.validator import validate
 from timeseries_validator.contract import ValidationContract, ColumnRules
 from timeseries_validator.issues import ValidationCode, Severity
+from timeseries_validator.validation_options import SortOrder
 
 def test_validate_empty_dataset():
     test_df = pd.DataFrame()
@@ -131,4 +131,23 @@ def test_validate_allowed_values():
         for issue in issues
     )
 
+def test_validate_sort_order():
+    test_df = pd.DataFrame({"test1": [None, 1, 0, None, -1], "test2": [2, 2, 3, 2, 3]})
+    validation_contract = ValidationContract(require_non_empty=True, columns={
+        "test1" : ColumnRules(specific_sort_order=SortOrder.DECREASING),
+        "test2": ColumnRules(specific_sort_order=SortOrder.INCREASING)
+    })
+
+    # Validate the DataFrame
+    issues = validate(test_df, validation_contract)
+
+    # Should skip missing values
+    # Check that the correct issue is returned
+    assert len(issues) == 1
+    assert any(
+        issue.code == ValidationCode.SORT_ORDER
+        and "test2" in issue.message
+        and "increasing" in issue.message
+        for issue in issues
+    )
 
