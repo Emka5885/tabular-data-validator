@@ -172,3 +172,43 @@ def test_validate_value_range():
         for issue in issues
     )
 
+def test_validate_returns_multiple_issues():
+    test_df = pd.DataFrame({"price": [1.0, -2.0, 3.0], "currency": ["PLN", "USD", "PLN"], "id": [1, 1, 2]})
+
+    validation_contract = ValidationContract(require_non_empty=True, columns={
+            "price": ColumnRules(minimum_value=0, maximum_value=10),
+            "currency": ColumnRules(allowed_values=["PLN", "EUR"]),
+            "id": ColumnRules(only_unique_values=True),
+            "missing_column": ColumnRules(required=True)
+        }
+    )
+
+    issues = validate(test_df, validation_contract)
+
+    # Check that the correct issues are returned
+    assert len(issues) == 4
+
+    assert any(
+        issue.code == ValidationCode.BELOW_MINIMUM
+        and "price" in issue.message
+        for issue in issues
+    )
+
+    assert any(
+        issue.code == ValidationCode.NOT_ALLOWED_VALUES
+        and "currency" in issue.message
+        for issue in issues
+    )
+
+    assert any(
+        issue.code == ValidationCode.DUPLICATE_VALUES
+        and "id" in issue.message
+        for issue in issues
+    )
+
+    assert any(
+        issue.code == ValidationCode.MISSING_REQUIRED_COLUMNS
+        and "missing_column" in issue.message
+        for issue in issues
+    )
+
