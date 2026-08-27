@@ -3,26 +3,38 @@ from datetime import datetime
 
 from timeseries_validator.validation_options import SortOrder
 
-ecb_contract = ValidationContract(
+# Define validation rules for the temperature dataset.
+# ValidationContract contains dataset-level settings and rules for individual columns.
+temperature_contract = ValidationContract(
     require_non_empty=True,
     columns = {
-        "TIME_PERIOD" : ColumnRules(
+        "id" : ColumnRules(
             required=True,
             no_missing_values=True,
+            data_type=int,
+            only_unique_values=True
+        ),
+        "timestamp" : ColumnRules(
+            required=True,
             data_type=datetime,
-            only_unique_values=True,
-            specific_sort_order=SortOrder.INCREASING
-        ),
-        "OBS_VALUE" : ColumnRules(
-            required=True,
+            specific_sort_order=SortOrder.INCREASING,
             no_missing_values=True,
+        ),
+        "sensor" : ColumnRules(
+            required=True,
+            data_type=str,
+            allowed_values=["A", "B", "C"],
+        ),
+        "temperature" : ColumnRules(
+            required=True,
             data_type=float,
-            minimum_value=0.0001
+            minimum_value=-40,
+            maximum_value=40,
         ),
-        "CURRENCY" : ColumnRules(
+        "status" : ColumnRules(
             required=True,
-            no_missing_values=True,
-            allowed_values=["PLN"],
+            data_type=str,
+            allowed_values=["OK", "WARNING", "ERROR"],
         ),
     }
 )
