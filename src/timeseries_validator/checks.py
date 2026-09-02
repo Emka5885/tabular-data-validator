@@ -6,7 +6,7 @@ from .validation_options import SortOrder
 
 def validate_empty_dataset(data: pd.DataFrame) -> list[ValidationIssue]:
     if data.empty:
-        return [ValidationIssue(ValidationCode.EMPTY_DATASET, Severity.ERROR, "[ERROR] Dataset is empty")]
+        return [ValidationIssue(ValidationCode.EMPTY_DATASET, Severity.ERROR, "Dataset is empty")]
     return []
 
 def validate_required_columns(data: pd.DataFrame, required_columns: list[str]) -> list[ValidationIssue]:
@@ -18,7 +18,7 @@ def validate_required_columns(data: pd.DataFrame, required_columns: list[str]) -
     if not missing_columns:
         return []
 
-    message = "[ERROR] Missing required columns: " + ", ".join(missing_columns)
+    message = "Missing required columns: " + ", ".join(missing_columns)
     return [ValidationIssue(ValidationCode.MISSING_REQUIRED_COLUMNS, Severity.ERROR, message)]
 
 def validate_missing_values(data: pd.DataFrame, columns: list[str]) -> list[ValidationIssue]:
@@ -30,7 +30,7 @@ def validate_missing_values(data: pd.DataFrame, columns: list[str]) -> list[Vali
 
     errors = []
     for m in missing:
-        message = f"[ERROR] Column '{m}' has missing values in rows: {missing[m]}"
+        message = f"Column '{m}' has missing values in rows: {missing[m]}"
         errors.append(ValidationIssue(ValidationCode.MISSING_VALUES, Severity.ERROR, message))
 
     return errors
@@ -64,7 +64,7 @@ def validate_data_type(data: pd.DataFrame, column: str, data_type: type) -> list
     warning = data[column][warning_mask]
     if not warning.empty:
         found_warning_types = warning.apply(lambda value: type(value).__name__).unique().tolist()
-        message_warning = f"[WARNING] Column '{column}' for rows: {warning.index.tolist()} has incorrect data type.\n\t\t Expected: '{data_type.__name__}', Found: {found_warning_types}, but it can be converted to '{data_type.__name__}'"
+        message_warning = f"Column '{column}' for rows: {warning.index.tolist()} has incorrect data type.\n\t\t Expected: '{data_type.__name__}', Found: {found_warning_types}, but it can be converted to '{data_type.__name__}'"
 
         issues.append(ValidationIssue(ValidationCode.WRONG_DATA_TYPE, Severity.WARNING, message_warning))
 
@@ -75,7 +75,7 @@ def validate_data_type(data: pd.DataFrame, column: str, data_type: type) -> list
         return issues
 
     found_error_types = wrong.apply(lambda value: type(value).__name__).unique().tolist()
-    message = f"[ERROR] Column '{column}' for rows: {wrong.index.tolist()} has incorrect data type and they cannot be converted.\n\t\t Expected data type: '{data_type.__name__}', Found data type: {found_error_types}"
+    message = f"Column '{column}' for rows: {wrong.index.tolist()} has incorrect data type and they cannot be converted.\n\t\t Expected data type: '{data_type.__name__}', Found data type: {found_error_types}"
 
     issues.append(ValidationIssue(ValidationCode.WRONG_DATA_TYPE, Severity.ERROR, message))
 
@@ -91,7 +91,7 @@ def validate_unique_values(data: pd.DataFrame, column: str) -> list[ValidationIs
     if duplicated.empty:
         return []
 
-    message = f"[ERROR] Duplicated values in column '{column}':"
+    message = f"Duplicated values in column '{column}':"
     for value in duplicated_values:
         indexes = data.index[data[column] == value].tolist()
         message += f"\n\t\t Duplicated value {value} found at indices: {indexes}"
@@ -104,7 +104,7 @@ def validate_allowed_values(data: pd.DataFrame, column: str, allowed_values: lis
     # Keep only values that are not in the allowed values list
     incorrect_values = values[~values.isin(allowed_values)]
 
-    message = f"[ERROR] Values not allowed in column '{column}':"
+    message = f"Values not allowed in column '{column}':"
 
     for value in incorrect_values.unique():
         message += f"\n\t\t found {value} at indices: {incorrect_values.index[incorrect_values == value].tolist()}"
@@ -137,7 +137,7 @@ def validate_sort_order(data: pd.DataFrame, column: str, sort_order: SortOrder) 
             if values.nunique() != 1:
                 is_valid = False
         case _:
-            raise ValueError(f"[ERROR] Unsupported sort order: {sort_order}.")
+            raise ValueError(f"Unsupported sort order: {sort_order}.")
 
     if not is_valid:
         message = f"\t\t Column '{column}' does not have {sort_order.value} sort order"
@@ -156,7 +156,7 @@ def validate_value_range(data: pd.DataFrame, column: str, minimum, maximum) -> l
 
     less_than_minimum = values[values < minimum]
     if not less_than_minimum.empty:
-        message = f"[ERROR] Values below the minimum '{minimum}' in column '{column}':"
+        message = f"Values below the minimum '{minimum}' in column '{column}':"
         for value in less_than_minimum.unique():
             indexes = less_than_minimum.index[less_than_minimum == value].tolist()
             message += f"\n\t\t found {value} at indices: {indexes}\n"
@@ -164,7 +164,7 @@ def validate_value_range(data: pd.DataFrame, column: str, minimum, maximum) -> l
 
     greater_than_maximum = values[values > maximum]
     if not greater_than_maximum.empty:
-        message = f"[ERROR] Values above the maximum '{maximum}' in column '{column}':"
+        message = f"Values above the maximum '{maximum}' in column '{column}':"
         for value in greater_than_maximum.unique():
             indexes = greater_than_maximum.index[greater_than_maximum == value].tolist()
             message += f"\n\t\t found {value} at indices: {indexes}"
