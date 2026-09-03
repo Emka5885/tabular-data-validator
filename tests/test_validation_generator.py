@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from scripts.validation_generator import generate
 from pathlib import Path
@@ -26,8 +27,25 @@ def test_validation_generator(tmp_path):
     contract_content = contract_path.read_text(encoding="utf-8")
 
     for column in columns:
-        assert column in contract_content
+        assert f"{column!r}: ColumnRules()" in contract_content
 
     # Validate
     validate_path = folder_path / "validate.py"
     assert validate_path.is_file()
+
+    validate_content = validate_path.read_text(encoding="utf-8")
+    assert test_csv.name in validate_content
+
+def test_folder_already_exists(tmp_path):
+    test_csv = Path(__file__).parent / "data" / "test.csv"
+
+    generate(test_csv, output_folder=tmp_path)
+
+    with pytest.raises(FileExistsError):
+        generate(test_csv, output_folder=tmp_path)
+
+def test_dataset_not_found_at_specific_path(tmp_path):
+    test_csv = Path(__file__).parent / "data" / "not_exist.csv"
+
+    with pytest.raises(FileNotFoundError):
+        generate(test_csv, output_folder=tmp_path)
