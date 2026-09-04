@@ -1,7 +1,7 @@
 import pandas as pd
 
 from contract import temperature_contract
-from timeseries_validator.validator import validate
+from tabular_data_validator.validator import validate
 
 # Load the dataset from a CSV file.
 temperature_dataset = pd.read_csv("temperature.csv", sep=";", decimal=",")

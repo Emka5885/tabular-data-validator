@@ -1,6 +1,6 @@
 import pytest
 
-from timeseries_validator.conversion import can_convert
+from tabular_data_validator.conversion import can_convert
 from datetime import datetime
 
 def test_conversion_with_unsupported_data_type():

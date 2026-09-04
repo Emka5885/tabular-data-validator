@@ -1,4 +1,4 @@
-from timeseries_validator.contract import ValidationContract, ColumnRules
+from tabular_data_validator.contract import ValidationContract, ColumnRules
 
 def test_validation_contract_defaults():
     contract = ValidationContract()

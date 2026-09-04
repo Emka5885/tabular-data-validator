@@ -1,6 +1,4 @@
-from numpy.ma.core import minimum
-
-from timeseries_validator.contract import ValidationContract, ColumnRules
+from tabular_data_validator.contract import ValidationContract, ColumnRules
 
 heart_failure_contract = ValidationContract(
     require_non_empty=True,

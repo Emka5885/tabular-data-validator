@@ -1,6 +1,6 @@
 import pandas as pd
 from .issues import ValidationIssue, ValidationCode, Severity
-from timeseries_validator.conversion import can_convert
+from .conversion import can_convert
 
 from .validation_options import SortOrder
 

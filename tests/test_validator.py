@@ -1,9 +1,9 @@
 import pandas as pd
 
-from timeseries_validator.validator import validate
-from timeseries_validator.contract import ValidationContract, ColumnRules
-from timeseries_validator.issues import ValidationCode, Severity
-from timeseries_validator.validation_options import SortOrder
+from tabular_data_validator.validator import validate
+from tabular_data_validator.contract import ValidationContract, ColumnRules
+from tabular_data_validator.issues import ValidationCode, Severity
+from tabular_data_validator.validation_options import SortOrder
 
 def test_validate_empty_dataset():
     test_df = pd.DataFrame()
