@@ -4,6 +4,12 @@ This is a Python library that allows you to validate tabular datasets based on s
 
 When you have a dataset with a large number of rows, checking manually if all records are correct is not practical. This validator allows you to check them automatically. You only need to define which rules each column should follow.
 
+## Installation
+
+```bash
+pip install tabular-data-validator
+```
+
 ## Features
 
 - empty dataset validation
