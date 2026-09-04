@@ -1,7 +1,7 @@
 [project]
 name = "tabular-data-validator"
 version = "0.1.0"
-description = "A Python library for validating datasets using configurable validation rules"
+description = "A Python library for validating tabular datasets using configurable validation rules"
 readme = "README.md"
 authors = [
     { name = "Emilia Masiak", email = "90275335+Emka5885@users.noreply.github.com" }
