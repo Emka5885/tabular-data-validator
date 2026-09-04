@@ -1,7 +1,5 @@
-from tabular_data_validator.contract import ValidationContract, ColumnRules
+from tabular_data_validator import ValidationContract, ColumnRules, SortOrder
 from datetime import datetime
-
-from tabular_data_validator.validation_options import SortOrder
 
 ecb_contract = ValidationContract(
     require_non_empty=True,

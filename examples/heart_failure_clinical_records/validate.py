@@ -1,7 +1,7 @@
 import pandas as pd
 
 from contract import heart_failure_contract
-from tabular_data_validator.validator import validate
+from tabular_data_validator import validate
 
 heart_failure_dataset = pd.read_csv("heart_failure_clinical_records_dataset.csv", sep=",")
 

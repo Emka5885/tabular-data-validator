@@ -1,7 +1,5 @@
-from tabular_data_validator.contract import ValidationContract, ColumnRules
+from tabular_data_validator import ValidationContract, ColumnRules, SortOrder
 from datetime import datetime
-
-from tabular_data_validator.validation_options import SortOrder
 
 # Define validation rules for the temperature dataset.
 # ValidationContract contains dataset-level settings and rules for individual columns.
