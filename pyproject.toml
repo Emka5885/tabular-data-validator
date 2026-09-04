@@ -3,6 +3,8 @@ name = "tabular-data-validator"
 version = "0.1.0"
 description = "A Python library for validating tabular datasets using configurable validation rules"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "Emilia Masiak", email = "90275335+Emka5885@users.noreply.github.com" }
 ]
@@ -20,5 +22,5 @@ dev = [
     "pytest>=9.1.1",
 ]
 
-[tool.pytest.ini_options]
-pythonpath = ["."]
+[project.scripts]
+tabular-data-validator = "tabular_data_validator.cli:main"
