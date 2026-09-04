@@ -1,13 +1,7 @@
-import argparse
 import csv
-import shutil
 import pandas as pd
 from pathlib import Path
-
-parser = argparse.ArgumentParser()
-parser.add_argument("dataset_path")
-parser.add_argument("--delimiter")
-parser.add_argument("--decimal")
+import shutil
 
 def delete_dataset_folder(dataset_folder):
     shutil.rmtree(dataset_folder)
@@ -19,7 +13,7 @@ def generate(dataset_path, delimiter = None, decimal = None, output_folder=None)
     dataset_name = dataset_path.stem
 
     if output_folder is None:
-        output_folder = Path(__file__).resolve().parent
+        output_folder = Path.cwd()
     target_folder = Path(output_folder) / dataset_name
 
     if delimiter is None:
@@ -49,7 +43,7 @@ def generate(dataset_path, delimiter = None, decimal = None, output_folder=None)
         for column in columns:
             columns_code += f"{repr(column)}: ColumnRules(),\n\t\t"
 
-        contract_content = f"""from timeseries_validator.contract import ValidationContract, ColumnRules
+        contract_content = f"""from tabular_data_validator import ValidationContract, ColumnRules
 
 validation_contract = ValidationContract(
     require_non_empty=True,
@@ -69,7 +63,7 @@ validation_contract = ValidationContract(
 from pathlib import Path
 
 from contract import validation_contract
-from timeseries_validator.validator import validate
+from tabular_data_validator import validate
 
 dataset_folder = Path(__file__).resolve().parent
 csv_path = dataset_folder / {dataset_path.name!r}
@@ -88,12 +82,3 @@ for issue in issues:
     except Exception:
         delete_dataset_folder(target_folder)
         raise
-
-
-def main():
-    args = parser.parse_args()
-    generate(args.dataset_path, args.delimiter, args.decimal)
-
-
-if __name__ == "__main__":
-    main()

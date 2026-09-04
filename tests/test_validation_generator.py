@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from scripts.validation_generator import generate
+from tabular_data_validator.validation_files_generator import generate
 from pathlib import Path
 
 def test_validation_generator(tmp_path):
