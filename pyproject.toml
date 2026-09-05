@@ -1,6 +1,6 @@
 [project]
 name = "tabular-data-validator"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Python library for validating tabular datasets using configurable validation rules"
 readme = "README.md"
 license = "MIT"
@@ -8,9 +8,9 @@ license-files = ["LICENSE"]
 authors = [
     { name = "Emilia Masiak", email = "90275335+Emka5885@users.noreply.github.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
-    "pandas>=3.0.5",
+    "pandas>=2.1.4",
 ]
 
 [build-system]
